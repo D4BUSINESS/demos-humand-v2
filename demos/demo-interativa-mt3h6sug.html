@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo interativa</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;background:#F1F0EC;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 14px 70px;}
+.wrap{max-width:820px;width:100%;}
+h1{font-family:'Space Grotesk',sans-serif;font-size:18px;margin:0 0 4px;}
+p.sub{color:#6B6B76;font-size:13px;margin:0 0 16px;}
+.panel{background:#fff;border:1px solid #DEDCD4;border-radius:16px;overflow:hidden;}
+.stage{position:relative;background:#0F1522;min-height:300px;}
+.stage img{width:100%;display:block;}
+.point{position:absolute;width:22px;height:22px;border-radius:50%;background:#E8368F;border:2px solid #fff;
+  cursor:pointer;transform:translate(-50%,-50%);box-shadow:0 0 0 0 rgba(232,54,143,.55);animation:pulse 2.1s ease-out infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,54,143,.55);}70%{box-shadow:0 0 0 14px rgba(232,54,143,0);}100%{box-shadow:0 0 0 0 rgba(232,54,143,0);}}
+@media (prefers-reduced-motion:reduce){.point{animation:none;}}
+.point-cta{background:#25D366;box-shadow:0 0 0 0 rgba(37,211,102,.6);animation:pulse-cta 2.1s ease-out infinite;}
+@keyframes pulse-cta{0%{box-shadow:0 0 0 0 rgba(37,211,102,.6);}70%{box-shadow:0 0 0 14px rgba(37,211,102,0);}100%{box-shadow:0 0 0 0 rgba(37,211,102,0);}}
+.highlight-box{position:absolute;border:3px solid #FF6A39;border-radius:8px;box-shadow:0 0 0 4px rgba(255,106,57,.16);cursor:pointer;}
+.highlight-box.h-static{cursor:default;}
+.highlight-box .h-tag{position:absolute;top:-25px;left:-3px;background:#FF6A39;color:#fff;font-size:10.5px;font-weight:700;
+  padding:3px 8px;border-radius:6px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;}
+.highlight-box.h-cta{border-color:#25D366;box-shadow:0 0 0 4px rgba(37,211,102,.18);}
+.highlight-box.h-cta .h-tag{background:#25D366;}
+.demo-field-el{position:absolute;box-sizing:border-box;font-family:'Inter',sans-serif;font-size:14px;color:#1B1B1F;
+  background:#5b4fe80D;border:1.5px dashed #5b4fe873;border-radius:6px;padding:4px 7px;outline:none;
+  transition:border-color .15s ease, background .15s ease, font-size .1s ease;overflow:hidden;}
+.demo-field-el:hover{border-color:#5b4fe8BF;}
+.demo-field-el:focus{border-style:solid;border-color:#5b4fe8;background:#fff;box-shadow:0 0 0 3px #5b4fe826;}
+textarea.demo-field-el{resize:none;line-height:1.4;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;}
+.demo-field-group{position:absolute;box-sizing:border-box;font-family:'Inter',sans-serif;font-size:13px;
+  display:flex;flex-direction:column;gap:3px;justify-content:center;overflow:auto;}
+.demo-field-group label{display:flex;align-items:center;gap:6px;cursor:pointer;color:#1B1B1F;}
+.demo-output-el{position:absolute;box-sizing:border-box;font-family:'Inter',sans-serif;color:#1B1B1F;
+  overflow:hidden;display:flex;align-items:center;pointer-events:none;
+  white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;}
+.demo-arrow-el{position:absolute;pointer-events:none;color:#5b4fe8;}
+.arrow-svg-wrap{position:absolute;inset:0;pointer-events:none;}
+.arrow-svg-wrap svg{width:100%;height:100%;display:block;overflow:visible;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.35));}
+.tooltip-bubble{position:absolute;max-width:230px;background:#fff;color:#1B1B1F;border-radius:11px;padding:11px 13px;
+  font-size:12.5px;line-height:1.45;box-shadow:0 10px 26px -8px rgba(0,0,0,.4);z-index:9;}
+.tooltip-bubble img{display:block;width:100%;border-radius:7px;margin-bottom:8px;cursor:zoom-in;}
+.tooltip-bubble .tb-close{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:50%;
+  border:1px solid rgba(0,0,0,.08);background:#fff;color:#6B6B76;font-size:12px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px -2px rgba(0,0,0,.25);padding:0;}
+.tooltip-bubble .tb-close:hover{background:#F4F3EE;color:#1B1B1F;}
+.img-lightbox{position:fixed;inset:0;background:rgba(10,10,14,.86);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+.img-lightbox img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:10px;
+  box-shadow:0 20px 60px -10px rgba(0,0,0,.6);cursor:default;}
+.img-lightbox .lb-close{position:absolute;top:18px;right:22px;width:38px;height:38px;border-radius:50%;
+  border:none;background:rgba(255,255,255,.14);color:#fff;font-size:18px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;}
+.img-lightbox .lb-close:hover{background:rgba(255,255,255,.26);}
+.tooltip-bubble button{margin-top:9px;background:#5b4fe8;color:#fff;border:none;border-radius:7px;font-size:11.5px;font-weight:600;padding:6px 11px;cursor:pointer;}
+.tooltip-bubble button.cta{background:#25D366;}
+.nav-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #DEDCD4;font-size:12px;color:#6B6B76;}
+.dots{display:flex;gap:6px;}
+.dots span{width:7px;height:7px;border-radius:50%;background:#DEDCD4;}
+.dots span.on{background:#5b4fe8;}
+.restart{background:none;border:none;color:#5b4fe8;font-weight:600;font-size:12px;cursor:pointer;}
+
+.stage.stage-hub{background:linear-gradient(180deg,#F7F6F2 0%,#EFEDE6 100%);}
+.hub-wrap{padding:30px 22px 36px;}
+.hub-head{display:flex;align-items:center;gap:13px;margin-bottom:24px;}
+.hub-avatar{width:46px;height:46px;border-radius:50%;background:#5b4fe8;display:flex;align-items:center;
+  justify-content:center;color:#fff;font-weight:700;font-size:16px;font-family:'Space Grotesk',sans-serif;flex-shrink:0;
+  box-shadow:0 6px 16px -6px #5b4fe880;}
+.hub-head h2{margin:0;font-family:'Space Grotesk',sans-serif;font-size:16.5px;color:#1B1B1F;font-weight:700;}
+.hub-head p{margin:3px 0 0;font-size:12.5px;color:#8A8A93;}
+.hub-list{display:flex;flex-direction:column;gap:10px;}
+.hub-item{display:flex;align-items:center;gap:14px;width:100%;background:#fff;border:1px solid #E9E7E0;
+  border-radius:14px;padding:14px 16px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;
+  transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;}
+.hub-item:hover{border-color:#5b4fe866;box-shadow:0 10px 22px -12px rgba(20,20,30,.25);transform:translateY(-1px);}
+.hub-icon{width:40px;height:40px;border-radius:11px;background:#5b4fe817;color:#5b4fe8;font-size:18px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hub-text{min-width:0;}
+.hub-item-title{font-size:14px;font-weight:700;color:#1B1B1F;text-transform:capitalize;line-height:1.3;}
+.hub-item-sub{font-size:11.5px;color:#9C9BA3;margin-top:2px;}
+.hub-arrow{margin-left:auto;color:#C9C7BF;font-size:18px;flex-shrink:0;}
+
+@keyframes slideUpIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{from{opacity:0;transform:scale(.82);}to{opacity:1;transform:scale(1);}}
+@keyframes floatSlow{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-9px) rotate(10deg);}}
+@media (prefers-reduced-motion:reduce){
+  .ctx-slide,.case-slide,.ctx-slide *,.case-slide *{animation:none !important;}
+}
+.ctx-slide,.case-slide{position:relative;overflow:hidden;width:100%;box-sizing:border-box;
+  animation:slideUpIn .5s cubic-bezier(.16,1,.3,1) both;}
+.slide-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+  letter-spacing:.06em;padding:5px 12px;border-radius:20px;margin-bottom:14px;width:fit-content;}
+.slide-confetti{position:absolute;border-radius:50%;pointer-events:none;
+  animation:floatSlow 5s ease-in-out infinite;}
+.stat-card{animation:popIn .5s cubic-bezier(.16,1,.3,1) both;}
+.quote-mark{position:absolute;font-family:'Space Grotesk',sans-serif;font-size:64px;line-height:1;
+  font-weight:700;opacity:.13;top:-8px;left:2px;pointer-events:none;}
+.case-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:12.5px;font-family:'Space Grotesk',sans-serif;flex-shrink:0;}
+.slide-cta{position:relative;transition:transform .18s ease, box-shadow .18s ease;}
+.slide-cta:hover{transform:translateY(-2px);}
+.slide-cta .arrow{display:inline-block;transition:transform .18s ease;}
+.slide-cta:hover .arrow{transform:translateX(4px);}
+.open-thread{height:20px;margin:0 0 2px;opacity:.9;}
+.open-thread svg{width:100%;height:100%;display:block;}
+.open-carousel-shell{position:relative;margin:0 -4px;}
+.open-carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:6px 4px 4px;cursor:grab;scrollbar-width:none;}
+.open-carousel::-webkit-scrollbar{display:none;}
+.open-carousel.dragging{cursor:grabbing;scroll-snap-type:none;}
+.oc-card{flex:0 0 auto;width:168px;scroll-snap-align:start;background:#fff;border:1px solid #EFEDE6;border-radius:12px;overflow:hidden;}
+.oc-top{display:flex;align-items:center;gap:7px;padding:9px 10px 6px;}
+.oc-avatar{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9.5px;color:#fff;}
+.oc-name{font-size:10.5px;font-weight:700;color:#1B1B1F;line-height:1.2;}
+.oc-time{font-size:9px;color:#9C9BA3;}
+.oc-tag{display:inline-block;font-size:8.5px;font-weight:700;letter-spacing:.02em;padding:2px 7px;border-radius:5px;margin:0 10px 6px;}
+.oc-text{padding:0 10px 9px;font-size:10.5px;line-height:1.42;color:#2A2A33;}
+.oc-photo{margin:0 10px 9px;height:64px;border-radius:8px;}
+.oc-foot{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-top:1px solid #F1EFE9;font-size:9px;color:#9C9BA3;}
+.oc-reacts{display:flex;}
+.oc-bubble{width:16px;height:16px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8.5px;margin-left:-6px;box-shadow:0 0 0 1px #EFEDE6;}
+.oc-reacts .oc-bubble:first-child{margin-left:0;}
+.oc-badge{align-items:center;text-align:center;padding:16px 10px;display:flex;flex-direction:column;gap:6px;justify-content:center;width:168px;}
+.oc-badge-icon{width:36px;height:36px;border-radius:50%;background:#FEF3D9;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.oc-badge-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:10.5px;color:#1B1B1F;line-height:1.3;}
+.oc-badge-sub{font-size:9px;color:#9C9BA3;line-height:1.35;}
+.oc-nps{padding-bottom:10px;}
+.oc-nps-q{padding:0 10px 8px;font-size:10px;font-weight:600;color:#1B1B1F;line-height:1.4;}
+.oc-nps-row{display:flex;gap:3px;padding:0 10px;}
+.oc-nps-row span{flex:1;text-align:center;font-size:8.5px;font-weight:700;padding:4px 0;border-radius:5px;background:#F6F5F1;color:#6B6B76;}
+.oc-nps-row span.hi{color:#fff;}
+.open-hint{text-align:center;font-size:10px;color:#9C9BA3;margin-top:8px;}
+</style></head>
+<body>
+<div class="wrap">
+  
+  <h1>Demo interativa</h1>
+  <p class="sub">Clique nos pontos que aparecem na tela para navegar — como se você estivesse usando o sistema de verdade.</p>
+  <div class="panel">
+    <div class="stage" id="stage"></div>
+    <div class="nav-bar">
+      <span id="stepLabel"></span>
+      <div class="dots" id="dots"></div>
+      <button class="restart" id="restart">Recomeçar</button>
+      <button class="restart" id="menuBtn" style="display:none;">☰ Seções</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const screens = [{"id":1787348357150.3604,"type":"opening","points":[],"openHeadline":"Seu RH já tem sistemas. Mas onde está a rede que conecta as pessoas?","openSubline":"A Humand é a camada de conexão, comunicação e cultura da sua empresa — pode complementar o que você já usa, ou assumir uma parte importante da experiência atual.","openCategories":"Comunidades, Comunicação, Reconhecimento, Engajamento, Desenvolvimento","openCta":"Continuar","openCards":[{"type":"post","author":"Ana Paula","role":"Marketing","time":"2h","text":"Batemos nossa meta do trimestre! 🎉","tag":"CONQUISTA","tagKind":"good","reacts":"❤️ 👏 🎉","count":124},{"type":"badge","icon":"🏅","title":"Novo selo desbloqueado","sub":"Treinamento de Compliance concluído"},{"type":"post","author":"Diego Martins","role":"Operações","time":"5h","text":"Alguém sabe o passo a passo pra pedir reembolso? Preciso resolver ainda hoje.","tag":"AJUDA","tagKind":"accent","reacts":"💡 🙌","count":12},{"type":"photo","author":"Equipe RH","role":"Comunicação interna","time":"1d","text":"Dia de voluntariado: plantamos 40 mudas com o time todo 🌱","tag":"CULTURA","tagKind":"pink","reacts":"❤️ 🌱 👏","count":96},{"type":"nps","author":"Pesquisa rápida","role":"Clima organizacional","question":"De 0 a 10, quanto você recomendaria trabalhar aqui?"}],"isOpening":true},{"id":1787348421747.0435,"type":"mobile","points":[],"mobileBadge":"Experiência do colaborador","mobileHeadline":"Tudo que o seu time precisa,","mobileHeadlineStrong":"na palma da mão.","mobileSubline":"Mostre pro cliente como fica simples, intuitivo e acessível pelo celular — direto no bolso de cada colaborador."},{"id":1787348438373.6772,"type":"case","points":[],"caseCompany":"OXXO","caseIndustry":"Varejo / franquias","caseStats":[{"value":"90%","label":"de ativação"},{"value":"80%","label":"de usuários ativos mensalmente"},{"value":"85%","label":"de satisfação com o chatbot"}],"caseUrl":"https://humand.co/pt/success-story/oxxo/","caseCalendlyUrl":"https://calendly.com/reginaldo-d4b2021/30min","caseSummary":"Setor: Varejo / franquias.\n\nResultados: 90% de ativação, 80% de usuários ativos mensalmente, 85% de satisfação com o chatbot."}];
+const CONTACT_HREF = "";
+const TRACKING_URL = "https://script.google.com/macros/s/AKfycbwEHDmYsv66e3fskM8oyj29T_yfwFluF1YOslQozTcOV53aKqHOALyOa2ZdpBPFam9I/exec";
+const DEMO_ID = "demo-interativa";
+const HUB_ENABLED = false;
+const ACCENT = "#5b4fe8";
+const CAPTURE_W = 1440, CAPTURE_H = 900;
+const SECOES = HUB_ENABLED ? [...new Set(screens.filter(s=>s.segment).map(s=>s.segment))] : [];
+const openingIdx = screens.findIndex(s=>s.isOpening || s.type==='opening');
+let idx = openingIdx>=0 ? openingIdx : 0;
+let showingHub = false;
+// ---------- Estado da demo: o que o visitante digitou/escolheu, disponível para as próximas telas ----------
+let demoState = {};
+let mswIntervals = [];  // guarda os setInterval() do carrossel do slide "celular" na demo publicada
+// Encolhe a fonte do campo aos poucos até o conteúdo digitado caber dentro da
+// caixa marcada (sem vazar pra fora nem cortar texto). Volta ao tamanho normal
+// sozinho quando o texto diminui de novo.
+function fitFieldText(el){
+  const base = parseFloat(el.dataset.baseFont || getComputedStyle(el).fontSize) || 14;
+  if(!el.dataset.baseFont) el.dataset.baseFont = String(base);
+  let size = base;
+  el.style.fontSize = size+'px';
+  const minSize = 9;
+  let guard = 0;
+  while(size > minSize && guard < 60){
+    const overflowY = el.scrollHeight - el.clientHeight > 1;
+    const overflowX = el.scrollWidth - el.clientWidth > 1;
+    if(!overflowY && !overflowX) break;
+    size -= 0.5;
+    el.style.fontSize = size+'px';
+    guard++;
+  }
+}
+function buildArrowSvg(rotation){
+  const wrap = document.createElement('div');
+  wrap.className = 'arrow-svg-wrap';
+  wrap.style.transform = 'rotate('+(rotation||0)+'deg)';
+  wrap.innerHTML = '<svg viewBox="0 0 100 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">'
+    + '<line x1="6" y1="20" x2="76" y2="20" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>'
+    + '<path d="M64 3 L96 20 L64 37 Z" fill="currentColor"/></svg>';
+  return wrap;
+}
+function buildArrowElement(p){
+  const el = document.createElement('div');
+  el.className = 'demo-arrow-el';
+  el.style.left=p.x+'%'; el.style.top=p.y+'%'; el.style.width=p.w+'%'; el.style.height=p.h+'%';
+  el.appendChild(buildArrowSvg(p.rotation||0));
+  return el;
+}
+function buildFieldElement(p, state, onChange){
+  const common = (el)=>{
+    el.className = (el.className ? el.className+' ' : '') + 'demo-field-el';
+    el.style.left=p.x+'%'; el.style.top=p.y+'%'; el.style.width=p.w+'%'; el.style.height=p.h+'%';
+    return el;
+  };
+  const varName = p.varName || '';
+  if(p.fieldType==='textarea'){
+    const el = common(document.createElement('textarea'));
+    el.placeholder = p.placeholder||'';
+    el.value = state[varName]||'';
+    el.addEventListener('input', ()=>{ state[varName]=el.value; fitFieldText(el); if(onChange) onChange(); });
+    requestAnimationFrame(()=>fitFieldText(el));
+    return el;
+  }
+  if(p.fieldType==='select'){
+    const el = common(document.createElement('select'));
+    (p.options||[]).forEach(opt=>{
+      const o=document.createElement('option'); o.value=opt; o.textContent=opt; el.appendChild(o);
+    });
+    if(state[varName]) el.value = state[varName];
+    else if(p.options && p.options.length){ state[varName]=p.options[0]; }
+    el.addEventListener('change', ()=>{ state[varName]=el.value; if(onChange) onChange(); });
+    return el;
+  }
+  if(p.fieldType==='checkbox'){
+    const wrap = document.createElement('div');
+    wrap.className='demo-field-group';
+    wrap.style.left=p.x+'%'; wrap.style.top=p.y+'%'; wrap.style.width=p.w+'%'; wrap.style.height=p.h+'%';
+    const lab = document.createElement('label');
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!state[varName];
+    cb.addEventListener('change', ()=>{ state[varName]=cb.checked; if(onChange) onChange(); });
+    lab.appendChild(cb);
+    lab.appendChild(document.createTextNode(p.placeholder||varName||'opção'));
+    wrap.appendChild(lab);
+    return wrap;
+  }
+  if(p.fieldType==='radio'){
+    const wrap = document.createElement('div');
+    wrap.className='demo-field-group';
+    wrap.style.left=p.x+'%'; wrap.style.top=p.y+'%'; wrap.style.width=p.w+'%'; wrap.style.height=p.h+'%';
+    (p.options||[]).forEach((opt,oi)=>{
+      const lab = document.createElement('label');
+      const rd = document.createElement('input'); rd.type='radio'; rd.name='demo-radio-'+varName+'-'+p.x+'-'+p.y;
+      rd.checked = state[varName] ? state[varName]===opt : oi===0;
+      if(!state[varName] && oi===0) state[varName]=opt;
+      rd.addEventListener('change', ()=>{ if(rd.checked){ state[varName]=opt; if(onChange) onChange(); } });
+      lab.appendChild(rd); lab.appendChild(document.createTextNode(opt));
+      wrap.appendChild(lab);
+    });
+    return wrap;
+  }
+  const el = common(document.createElement('input'));
+  el.type = p.fieldType || 'text';
+  if(p.fieldType==='range'){ el.min=p.min!=null?p.min:0; el.max=p.max!=null?p.max:100; }
+  el.placeholder = p.placeholder||'';
+  if(state[varName]!=null && state[varName]!=='') el.value = state[varName];
+  if(el.type==='text'){
+    el.addEventListener('input', ()=>{ state[varName]=el.value; fitFieldText(el); if(onChange) onChange(); });
+    requestAnimationFrame(()=>fitFieldText(el));
+  } else {
+    el.addEventListener('input', ()=>{ state[varName]=el.value; if(onChange) onChange(); });
+  }
+  return el;
+}
+function buildOutputElement(p, state){
+  const el = document.createElement('div');
+  el.className='demo-output-el';
+  el.style.left=p.x+'%'; el.style.top=p.y+'%'; el.style.width=p.w+'%'; el.style.height=p.h+'%';
+  el.style.fontSize=(p.fontSize||14)+'px';
+  if(p.bold) el.style.fontWeight='700';
+  const val = state[p.varName||''];
+  el.textContent = (val!==undefined && val!=='' && val!==false) ? String(val) : (p.fallback||'');
+  requestAnimationFrame(()=>fitFieldText(el));
+  return el;
+}
+
+// ---------- Personalização por link: ?nome=...&empresa=... ----------
+const qp = new URLSearchParams(location.search);
+const TOKENS = { nome: qp.get('nome') || '', empresa: qp.get('empresa') || '' };
+function applyTokens(str){
+  if(!str) return str;
+  return str.replace(/\{\{\s*nome\s*\}\}/gi, TOKENS.nome || 'você')
+            .replace(/\{\{\s*empresa\s*\}\}/gi, TOKENS.empresa || 'sua empresa');
+}
+document.title = applyTokens(document.title);
+document.querySelector('h1').textContent = applyTokens(document.querySelector('h1').textContent);
+
+// ---------- Início automático por segmento: ?segmento=rh ----------
+const segmentoParam = (qp.get('segmento') || '').trim().toLowerCase();
+const hasIntroContext = !!(screens[0] && (screens[0].type==='context' || screens[0].type==='opening'));
+if(segmentoParam){
+  const alvo = screens.findIndex(s => (s.segment || '').toLowerCase() === segmentoParam);
+  if(alvo >= 0) idx = alvo;
+} else if(HUB_ENABLED && SECOES.length && !hasIntroContext){
+  // Só pula direto pro menu de seções se não houver um slide de contexto abrindo a demo.
+  // Se houver, ele é mostrado primeiro (idx=0) e o menu aparece quando o usuário avançar.
+  showingHub = true;
+}
+
+// ---------- Rastreamento grátis (Apps Script) — via pixel, sem CORS ----------
+function track(event, extra){
+  if(!TRACKING_URL) return;
+  try{
+    const secaoAtual = (screens[idx] && screens[idx].segment) || '';
+    const params = new URLSearchParams({ event, demo: DEMO_ID, screen: String(idx+1), secao: secaoAtual, nome: TOKENS.nome, empresa: TOKENS.empresa, ...(extra||{}) });
+    new Image().src = TRACKING_URL + (TRACKING_URL.includes('?') ? '&' : '?') + params.toString();
+  }catch(err){}
+}
+
+const stage = document.getElementById('stage');
+const dotsEl = document.getElementById('dots');
+const stepLabel = document.getElementById('stepLabel');
+
+function renderDots(){
+  dotsEl.innerHTML = screens.map((_,i)=>'<span class="'+(i===idx?'on':'')+'"></span>').join('');
+  stepLabel.textContent = 'Tela ' + (idx+1) + ' de ' + screens.length;
+}
+
+const HUB_ICONS = {
+  engajamento:'🚀', chat:'💬', ponto:'⏱️', pagamento:'💰', folha:'💰', pagto:'💰',
+  reconhecimento:'🏆', treinamento:'🎓', curso:'🎓', comunicacao:'📣', comunicado:'📣',
+  beneficio:'🎁', onboarding:'🧭', pesquisa:'📊', clima:'📊', documento:'🗂️', ferias:'🌴',
+  organograma:'🧩', vaga:'💼', feed:'📰', perfil:'👤'
+};
+function hubIconFor(sec){
+  const key = sec.toLowerCase();
+  const found = Object.keys(HUB_ICONS).find(k=>key.includes(k));
+  return found ? HUB_ICONS[found] : '✦';
+}
+function renderHub(){
+  stepLabel.textContent = 'Escolha uma seção';
+  dotsEl.innerHTML = '';
+  stage.classList.add('stage-hub');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'hub-wrap';
+
+  const head = document.createElement('div');
+  head.className = 'hub-head';
+  const initials = ((TOKENS.empresa || TOKENS.nome || 'RH').trim().match(/S+/g) || ['R','H'])
+    .slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  const saudacao = TOKENS.nome ? ('Olá, ' + TOKENS.nome) : 'Olá 👋';
+  head.innerHTML = '<div class="hub-avatar">'+initials+'</div>'+
+    '<div><h2>'+saudacao+'</h2><p>O que você quer conhecer primeiro?</p></div>';
+  wrap.appendChild(head);
+
+  const list = document.createElement('div');
+  list.className = 'hub-list';
+  SECOES.forEach(sec=>{
+    const item = document.createElement('button');
+    item.className = 'hub-item';
+    item.innerHTML =
+      '<div class="hub-icon">'+hubIconFor(sec)+'</div>'+
+      '<div class="hub-text">'+
+        '<div class="hub-item-title">'+sec.replace(/-/g,' ')+'</div>'+
+        '<div class="hub-item-sub">Toque para explorar</div>'+
+      '</div>'+
+      '<div class="hub-arrow">›</div>';
+    item.addEventListener('click', ()=>{
+      const alvo = screens.findIndex(x=>(x.segment||'')===sec);
+      if(alvo>=0){
+        idx = alvo;
+        showingHub = false;
+        track('secao_click', {secao:sec});
+        render();
+      }
+    });
+    list.appendChild(item);
+  });
+  wrap.appendChild(list);
+  stage.appendChild(wrap);
+  track('menu_view');
+}
+
+function shadeColor(hex, percent){
+  hex = (hex||'#5B4FE8').replace('#','');
+  if(hex.length===3) hex = hex.split('').map(function(c){return c+c;}).join('');
+  const num = parseInt(hex,16) || 0x5B4FE8;
+  let r=(num>>16)+percent, g=((num>>8)&0x00FF)+percent, b=(num&0x0000FF)+percent;
+  r=Math.max(Math.min(255,r),0); g=Math.max(Math.min(255,g),0); b=Math.max(Math.min(255,b),0);
+  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
+}
+function tintColor(hex, amount){
+  hex = (hex||'#5B4FE8').replace('#','');
+  if(hex.length===3) hex = hex.split('').map(function(c){return c+c;}).join('');
+  const num = parseInt(hex,16) || 0x5B4FE8;
+  let r=(num>>16), g=((num>>8)&0xFF), b=(num&0xFF);
+  r=Math.round(r+(255-r)*amount); g=Math.round(g+(255-g)*amount); b=Math.round(b+(255-b)*amount);
+  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
+}
+function initialsOf(name){
+  const words = (name||'').trim().match(/S+/g) || ['?'];
+  return words.slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
+}
+function openTagColors(kind, ACCENT){
+  const map = {
+    good:   {bg:'#E4F7EE', fg:'#1E9E6B'},
+    accent: {bg:ACCENT+'1A', fg:shadeColor(ACCENT,-30)},
+    pink:   {bg:'#FDEAF3', fg:'#C42A78'},
+    warn:   {bg:'#FEF3D9', fg:'#8A6300'}
+  };
+  return map[kind] || map.accent;
+}
+function openCardHTML(c, i, ACCENT){
+  const palette = [ACCENT, '#FF6A39', '#1E9E6B', shadeColor(ACCENT,-35), '#E8368F'];
+  const avatarBg = palette[i % palette.length];
+  const esc = function(t){ return (t||'').replace(/</g,'&lt;'); };
+  if(c.type === 'badge'){
+    return '<div class="oc-card oc-badge">'+
+      '<div class="oc-badge-icon">'+(esc(c.icon)||'🏅')+'</div>'+
+      '<div class="oc-badge-title">'+esc(c.title)+'</div>'+
+      '<div class="oc-badge-sub">'+esc(c.sub)+'</div>'+
+    '</div>';
+  }
+  if(c.type === 'nps'){
+    return '<div class="oc-card oc-nps">'+
+      '<div class="oc-top">'+
+        '<div class="oc-avatar" style="background:'+avatarBg+'">'+initialsOf(c.author||'?')+'</div>'+
+        '<div><div class="oc-name">'+esc(c.author)+'</div><div class="oc-time">'+esc(c.role)+'</div></div>'+
+      '</div>'+
+      '<div class="oc-nps-q">'+esc(c.question)+'</div>'+
+      '<div class="oc-nps-row"><span>0</span><span>2</span><span>4</span><span>6</span><span class="hi" style="background:'+ACCENT+'">8</span><span>10</span></div>'+
+    '</div>';
+  }
+  const tagC = openTagColors(c.tagKind, ACCENT);
+  const photo = c.type==='photo' ? ('<div class="oc-photo" style="background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-35)+')"></div>') : '';
+  const reacts = (c.reacts||'').trim().split(/s+/).filter(Boolean);
+  const tagHtml = c.tag ? ('<div class="oc-tag" style="background:'+tagC.bg+';color:'+tagC.fg+'">'+esc(c.tag)+'</div>') : '';
+  const reactsHtml = reacts.map(function(r,ri){ return '<span class="oc-bubble" style="z-index:'+(10-ri)+'">'+r+'</span>'; }).join('');
+  return '<div class="oc-card">'+
+    '<div class="oc-top">'+
+      '<div class="oc-avatar" style="background:'+avatarBg+'">'+initialsOf(c.author||'?')+'</div>'+
+      '<div><div class="oc-name">'+esc(c.author)+'</div><div class="oc-time">'+esc(c.role)+(c.time?(' · '+esc(c.time)):'')+'</div></div>'+
+    '</div>'+
+    tagHtml+
+    '<div class="oc-text">'+esc(c.text)+'</div>'+
+    photo+
+    '<div class="oc-foot">'+
+      '<div class="oc-reacts">'+reactsHtml+'</div>'+
+      '<span>'+(c.count||0)+' pessoas</span>'+
+    '</div>'+
+  '</div>';
+}
+function openThreadSVG(n, ACCENT){
+  const w = 900, h = 20, pts = [];
+  for(let i=0;i<n;i++) pts.push(40 + i*((w-80)/Math.max(1,n-1)));
+  let path = 'M'+pts[0]+','+(h/2);
+  for(let i=1;i<pts.length;i++){
+    const midX = (pts[i-1]+pts[i])/2;
+    path += ' Q'+midX+','+(i%2? h-2 : 2)+' '+pts[i]+','+(h/2);
+  }
+  const dots = pts.map(function(x){ return '<circle cx="'+x+'" cy="'+(h/2)+'" r="2.6" fill="'+ACCENT+'" opacity=".55"/>'; }).join('');
+  return '<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><path d="'+path+'" fill="none" stroke="'+ACCENT+'" stroke-width="1.6" stroke-dasharray="1,6" stroke-linecap="round" opacity=".45"/>'+dots+'</svg>';
+}
+function wireOpenCarousel(track){
+  if(!track) return;
+  let isDown=false, startX=0, scrollLeft=0, autoplay=true;
+  track.addEventListener('pointerdown', function(e){
+    isDown=true; autoplay=false; track.classList.add('dragging');
+    startX = e.pageX; scrollLeft = track.scrollLeft;
+  });
+  window.addEventListener('pointerup', function(){ isDown=false; track.classList.remove('dragging'); });
+  window.addEventListener('pointermove', function(e){
+    if(!isDown) return;
+    track.scrollLeft = scrollLeft - (e.pageX - startX);
+  });
+  track.addEventListener('mouseenter', function(){ autoplay=false; });
+  track.addEventListener('mouseleave', function(){ autoplay=true; });
+  function tick(){
+    if(autoplay && !isDown && track.isConnected){
+      track.scrollLeft += 0.5;
+      if(track.scrollLeft + track.clientWidth >= track.scrollWidth - 1){ track.scrollLeft = 0; }
+    }
+    if(track.isConnected) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+function clearMswIntervals(){
+  mswIntervals.forEach(function(id){ clearInterval(id); });
+  mswIntervals = [];
+}
+function ctxDecor(ACCENT){
+  const icons = [
+    {e:'👥',top:'9%', left:'87%',size:46,rot:-8, op:.15},
+    {e:'💬',top:'58%',left:'93%',size:32,rot:9,  op:.12},
+    {e:'📊',top:'87%',left:'11%',size:40,rot:-6, op:.13},
+    {e:'📅',top:'11%',left:'5%', size:30,rot:8,  op:.11},
+    {e:'🕐',top:'37%',left:'96%',size:26,rot:-4, op:.11},
+    {e:'❤️',top:'93%',left:'63%',size:26,rot:6,  op:.10},
+    {e:'🥇',top:'4%', left:'52%',size:22,rot:-10,op:.10}
+  ];
+  const spans = icons.map(function(ic){
+    return '<span style="position:absolute;top:'+ic.top+';left:'+ic.left+';font-size:'+ic.size+'px;opacity:'+ic.op+';filter:grayscale(1);transform:translate(-50%,-50%) rotate('+ic.rot+'deg);">'+ic.e+'</span>';
+  }).join('');
+  return '<div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;">'+
+    '<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;">'+
+      '<g stroke="'+ACCENT+'" stroke-width="0.3" stroke-dasharray="1.4 2.4" fill="none" opacity=".2">'+
+        '<path d="M87,9 L93,37 L96,37"/>'+
+        '<path d="M5,11 L52,4 L87,9"/>'+
+        '<path d="M11,87 L63,93 L93,58"/>'+
+        '<path d="M5,11 L11,87"/>'+
+      '</g>'+
+      '<g fill="'+ACCENT+'" opacity=".3">'+
+        '<circle cx="87" cy="9" r="0.9"/><circle cx="93" cy="37" r="0.9"/><circle cx="96" cy="37" r="0.9"/>'+
+        '<circle cx="5" cy="11" r="0.9"/><circle cx="52" cy="4" r="0.9"/>'+
+        '<circle cx="11" cy="87" r="0.9"/><circle cx="63" cy="93" r="0.9"/><circle cx="93" cy="58" r="0.9"/>'+
+      '</g>'+
+    '</svg>'+
+    spans+
+  '</div>';
+}
+function dividerIconFor(topic){
+  const t = (topic||'').toLowerCase();
+  const map = [
+    [/chat|mensage|conversa/, '💬'],
+    [/reconhe|elogio|conquista|celebra|parabén/, '🏆'],
+    [/treinamento|curso|capacita|aprend|onboarding|integra/, '🎓'],
+    [/desempenho|performance|avalia|feedback/, '📈'],
+    [/pdi|desenvolv|carreira|plano/, '🎯'],
+    [/pesquisa|clima|nps|humor|enquete/, '📊'],
+    [/benefício|beneficio|folha|pagamento|holerite/, '💳'],
+    [/ponto|jornada|escala|banco de horas/, '🕐'],
+    [/cultura|comunidade|unidade/, '🌐'],
+    [/comunica|aviso|informativo|notícia|noticia/, '📣'],
+    [/meta|okr|objetivo/, '🥅'],
+    [/documento|assinatura|processo/, '📄'],
+    [/loja|operação|operacao|campo|linha de frente/, '🏭']
+  ];
+  for(let i=0;i<map.length;i++){ if(map[i][0].test(t)) return map[i][1]; }
+  return '🧭';
+}
+function dividerEyebrowFor(topic){
+  const phrases = ['🔀 MUDANDO DE ASSUNTO','➡️ PRÓXIMA PARADA','✨ AGORA, FALANDO DE','🧭 SEGUINDO O TOUR','💫 BORA PRA OUTRA FRENTE'];
+  const t = topic || '';
+  let hash = 0;
+  for(let i=0;i<t.length;i++) hash = (hash*31 + t.charCodeAt(i)) >>> 0;
+  return phrases[hash % phrases.length];
+}
+function buildDividerSlide(s, onNext){
+  const wrap = document.createElement('div');
+  wrap.className = 'ctx-slide';
+  wrap.style.cssText = 'padding:52px 34px;min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 15% 12%,'+tintColor(ACCENT,.72)+' 0%,transparent 55%),radial-gradient(circle at 88% 90%,'+tintColor(ACCENT,.8)+' 0%,transparent 52%),linear-gradient(160deg,'+tintColor(ACCENT,.92)+' 0%,#FBFAF7 62%);';
+  const icon = dividerIconFor(s.topic);
+  const eyebrow = dividerEyebrowFor(s.topic);
+  wrap.innerHTML =
+    ctxDecor(ACCENT)+
+    '<div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;">'+
+    '<div style="width:60px;height:60px;border-radius:17px;background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-30)+');display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 14px 30px -12px '+ACCENT+'88;margin-bottom:16px;">'+icon+'</div>'+
+    '<div class="slide-eyebrow" style="background:'+ACCENT+'18;color:'+shadeColor(ACCENT,-40)+';">'+eyebrow+'</div>'+
+    '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:24px;font-weight:700;line-height:1.28;color:#1B1B1F;margin:14px 0 10px;max-width:420px;">'+(s.topic||'Próximo assunto').replace(/</g,'&lt;')+'</div>'+
+    '<div style="width:38px;height:3px;border-radius:3px;background:'+ACCENT+';opacity:.5;margin-bottom:18px;"></div>'+
+    '<div style="font-size:13.5px;color:#6B6B76;margin-bottom:26px;max-width:340px;">Veja como fica na prática 👇</div>'+
+    '<button id="divNextBtn" class="slide-cta" style="background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-30)+');color:#fff;border:none;border-radius:12px;padding:13px 26px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px -10px '+ACCENT+'99;">Continuar <span class="arrow">→</span></button>'+
+    '</div>';
+  wrap.querySelector('#divNextBtn').addEventListener('click', onNext);
+  return wrap;
+}
+var MOBILE_SHOWCASE_CSS = '.msw-widget{--msw-accent:#5B4FE8;--msw-accent-light:#8B7FFF;--msw-accent-soft:#EDEBFC;--msw-accent-ink:#2E2795;}.msw-phone{width:250px;height:503px;background:#111318;border-radius:35px;padding:8px;margin:0 auto;box-shadow:0 30px 60px rgba(20,30,50,.22),0 8px 22px rgba(20,30,50,.12);position:relative;}.msw-phone::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:84px;height:20px;background:#111318;border-radius:0 0 14px 14px;z-index:20;}.msw-screen{width:100%;height:100%;border-radius:28px;overflow:hidden;background:#f7f8fa;position:relative;}.msw-status-bar{height:30px;padding:10px 15px 0;display:flex;justify-content:space-between;font-size:9px;font-weight:700;color:#344054;}.msw-app-header{padding:10px 14px 12px;background:#fff;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eaecf0;}.msw-brand{display:flex;align-items:center;gap:7px;}.msw-brand-logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--msw-accent),var(--msw-accent-light));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;}.msw-brand-name{font-size:11.5px;font-weight:800;}.msw-header-icons{display:flex;gap:9px;color:#667085;font-size:13px;}.msw-page{padding:14px;height:calc(100% - 74px);overflow-y:auto;}.msw-page::-webkit-scrollbar{display:none;}.msw-welcome{margin-bottom:14px;text-align:left;}.msw-welcome small{font-size:9px;color:#667085;}.msw-welcome h2{font-size:16px;margin-top:3px;text-align:left;}.msw-search{background:#fff;border:1px solid #e4e7ec;height:32px;border-radius:9px;display:flex;align-items:center;padding:0 10px;gap:7px;color:#98a2b3;font-size:10px;margin-bottom:14px;text-align:left;}.msw-section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}.msw-section-title strong{font-size:11.5px;}.msw-section-title span{font-size:8.5px;color:var(--msw-accent);font-weight:700;}.msw-apps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;}.msw-app{background:#fff;border:1px solid #eaecf0;border-radius:11px;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}.msw-app-icon{width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--msw-accent-soft);}.msw-app span{font-size:7.5px;font-weight:600;color:#344054;text-align:center;}.msw-info-card{background:linear-gradient(135deg,var(--msw-accent),var(--msw-accent-light));color:#fff;border-radius:13px;padding:12px;margin-top:6px;text-align:left;}.msw-info-card small{opacity:.85;font-size:8px;}.msw-info-card h3{font-size:12px;margin:4px 0 5px;}.msw-info-card p{font-size:9px;opacity:.92;line-height:1.4;}.msw-bottom-nav{position:absolute;bottom:0;left:0;right:0;height:52px;background:rgba(255,255,255,.97);border-top:1px solid #eaecf0;display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px 5px;}.msw-nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#98a2b3;font-size:7.5px;font-weight:600;}.msw-nav-item.active{color:var(--msw-accent);}.msw-nav-icon{font-size:14px;}.msw-carousel-controls{margin-top:16px;display:flex;align-items:center;justify-content:center;gap:12px;}.msw-carousel-btn{width:34px;height:34px;border-radius:50%;border:1px solid #d0d5dd;background:#fff;cursor:pointer;font-size:14px;color:#344054;transition:.2s;}.msw-carousel-btn:hover{background:var(--msw-accent);color:#fff;border-color:var(--msw-accent);}.msw-dots{display:flex;gap:5px;}.msw-dot{width:6px;height:6px;border-radius:50%;background:#d0d5dd;cursor:pointer;}.msw-dot.active{width:18px;border-radius:8px;background:var(--msw-accent);}.msw-feed-card{background:#fff;border-radius:13px;padding:12px;margin-bottom:10px;border:1px solid #eaecf0;text-align:left;}.msw-feed-user{display:flex;align-items:center;gap:7px;margin-bottom:9px;}.msw-avatar{width:27px;height:27px;border-radius:50%;background:var(--msw-accent-soft);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9px;color:var(--msw-accent);}.msw-feed-user strong{font-size:10px;}.msw-feed-user small{display:block;font-size:7.5px;color:#98a2b3;}.msw-feed-card p{font-size:9px;line-height:1.45;color:#475467;}.msw-feed-image{height:80px;border-radius:9px;margin-top:9px;background:linear-gradient(135deg,var(--msw-accent-soft),#b8d9ed);display:flex;align-items:center;justify-content:center;color:var(--msw-accent-ink);font-weight:800;font-size:9px;text-align:center;padding:0 8px;}.msw-feed-actions{display:flex;gap:14px;margin-top:9px;color:#667085;font-size:8.5px;}.msw-profile-card{background:#fff;border-radius:14px;padding:18px 12px;text-align:center;border:1px solid #eaecf0;}.msw-profile-avatar{width:52px;height:52px;border-radius:50%;margin:auto;background:linear-gradient(135deg,var(--msw-accent),var(--msw-accent-light));display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800;}.msw-profile-card h3{margin-top:8px;font-size:13px;}.msw-profile-card p{margin-top:2px;color:#667085;font-size:9px;}.msw-profile-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}.msw-profile-box{background:#f8fafc;padding:9px;border-radius:9px;text-align:left;}.msw-profile-box small{display:block;color:#98a2b3;font-size:7.5px;margin-bottom:3px;}.msw-profile-box strong{font-size:9px;}.msw-service{background:#fff;border-radius:12px;padding:11px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid #eaecf0;text-align:left;}.msw-service-icon{width:32px;height:32px;border-radius:9px;background:var(--msw-accent-soft);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}.msw-service-content{flex:1;}.msw-service-content strong{display:block;font-size:9.5px;}.msw-service-content small{font-size:7.5px;color:#98a2b3;}.msw-service-arrow{color:#98a2b3;font-size:12px;}.msw-expand-btn{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:1px solid #d0d5dd;background:#fff;cursor:pointer;font-size:14px;color:#344054;box-shadow:0 4px 10px rgba(20,30,50,.14);z-index:6;line-height:1;}.msw-expand-btn:hover{background:var(--msw-accent);color:#fff;border-color:var(--msw-accent);}.msw-modal-overlay{position:fixed;inset:0;background:rgba(15,15,20,.8);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;}.msw-modal-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.14);color:#fff;font-size:16px;cursor:pointer;}.msw-modal-close:hover{background:rgba(255,255,255,.26);}.msw-modal-inner{display:flex;align-items:center;justify-content:center;}.msw-modal-group{transition:transform .12s ease;}.msw-features-grid{grid-template-columns:1fr 1fr;}@media (max-width:360px){.msw-features-grid{grid-template-columns:1fr;}.msw-phone{width:220px;height:443px;}}';
+function ensureMobileShowcaseStyles(){
+  if(document.getElementById('mswStyles')) return;
+  var style = document.createElement('style');
+  style.id = 'mswStyles';
+  style.textContent = MOBILE_SHOWCASE_CSS;
+  document.head.appendChild(style);
+}
+function buildMobileShowcaseInner(){
+  return '<div class="msw-phone"> <div class="msw-screen"> <div class="msw-status-bar"><span>9:41</span><span>● ● ●</span></div> <div class="msw-app-header"> <div class="msw-brand"> <div class="msw-brand-logo">H</div> <div class="msw-brand-name">Minha Empresa</div> </div> <div class="msw-header-icons">♡ ⋮</div> </div> <div> <div class="msw-page msw-slide"> <div class="msw-welcome"><small>Bom dia, Rinaldo 👋</small><h2>O que você precisa?</h2></div> <div class="msw-search">🔎 Buscar serviços...</div> <div class="msw-section-title"><strong>Aplicativos</strong><span>Ver todos</span></div> <div class="msw-apps-grid"> <div class="msw-app"><div class="msw-app-icon">👤</div><span>Meu Perfil</span></div> <div class="msw-app"><div class="msw-app-icon">📅</div><span>Férias</span></div> <div class="msw-app"><div class="msw-app-icon">📄</div><span>Documentos</span></div> <div class="msw-app"><div class="msw-app-icon">💰</div><span>Benefícios</span></div> <div class="msw-app"><div class="msw-app-icon">🎓</div><span>Treinamentos</span></div> <div class="msw-app"><div class="msw-app-icon">📝</div><span>Formulários</span></div> <div class="msw-app"><div class="msw-app-icon">🏆</div><span>Reconhecimento</span></div> <div class="msw-app"><div class="msw-app-icon">📢</div><span>Comunicados</span></div> <div class="msw-app"><div class="msw-app-icon">📚</div><span>Biblioteca</span></div> </div> <div class="msw-info-card"><small>DESTAQUE</small><h3>Semana de Desenvolvimento</h3><p>Confira os novos treinamentos disponíveis para você.</p></div> </div> <div class="msw-page msw-slide" style="display:none"> <div class="msw-welcome"><small>Comunicação</small><h2>Mural</h2></div> <div class="msw-feed-card"> <div class="msw-feed-user"><div class="msw-avatar">RH</div><div><strong>Recursos Humanos</strong><small>Hoje às 09:15</small></div></div> <p>Temos novidades para você! Confira os novos benefícios disponíveis neste mês.</p> <div class="msw-feed-image">NOVOS BENEFÍCIOS</div> <div class="msw-feed-actions">❤️ Curtir 💬 Comentar ↗ Compartilhar</div> </div> <div class="msw-feed-card"> <div class="msw-feed-user"><div class="msw-avatar">FC</div><div><strong>Fernanda Costa</strong><small>Ontem</small></div></div> <p>Parabéns para todo o time pela entrega do projeto!</p> <div class="msw-feed-actions">❤️ 24 💬 6</div> </div> </div> <div class="msw-page msw-slide" style="display:none"> <div class="msw-welcome"><small>Minha conta</small><h2>Meu perfil</h2></div> <div class="msw-profile-card"> <div class="msw-profile-avatar">RD</div> <h3>Rinaldo Diniz</h3> <p>Colaborador</p> <div class="msw-profile-info"> <div class="msw-profile-box"><small>Departamento</small><strong>Recursos Humanos</strong></div> <div class="msw-profile-box"><small>Cargo</small><strong>Especialista</strong></div> <div class="msw-profile-box"><small>Unidade</small><strong>São Paulo</strong></div> <div class="msw-profile-box"><small>Admissão</small><strong>12/03/2024</strong></div> </div> </div> </div> <div class="msw-page msw-slide" style="display:none"> <div class="msw-welcome"><small>Serviços</small><h2>Acesso rápido</h2></div> <div class="msw-service"><div class="msw-service-icon">📅</div><div class="msw-service-content"><strong>Solicitar férias</strong><small>Consulte seu saldo e solicite suas férias.</small></div><div class="msw-service-arrow">→</div></div> <div class="msw-service"><div class="msw-service-icon">📄</div><div class="msw-service-content"><strong>Holerites</strong><small>Consulte seus comprovantes de pagamento.</small></div><div class="msw-service-arrow">→</div></div> <div class="msw-service"><div class="msw-service-icon">🎓</div><div class="msw-service-content"><strong>Treinamentos</strong><small>Continue seu desenvolvimento.</small></div><div class="msw-service-arrow">→</div></div> <div class="msw-service"><div class="msw-service-icon">🏆</div><div class="msw-service-content"><strong>Reconhecimentos</strong><small>Reconheça alguém do seu time.</small></div><div class="msw-service-arrow">→</div></div> </div> </div> <div class="msw-bottom-nav"> <div class="msw-nav-item active"><div class="msw-nav-icon">⌂</div>Início</div> <div class="msw-nav-item"><div class="msw-nav-icon">▦</div>Apps</div> <div class="msw-nav-item"><div class="msw-nav-icon">♡</div>Mural</div> <div class="msw-nav-item"><div class="msw-nav-icon">●</div>Perfil</div> </div> </div> </div> <div class="msw-carousel-controls"> <button type="button" class="msw-carousel-btn msw-prev" aria-label="Tela anterior">←</button> <div class="msw-dots"> <div class="msw-dot active"></div><div class="msw-dot"></div><div class="msw-dot"></div><div class="msw-dot"></div> </div> <button type="button" class="msw-carousel-btn msw-next" aria-label="Próxima tela">→</button> </div>';
+}
+function wireMobileShowcaseCarousel(wrap, intervalsArr){
+  intervalsArr = intervalsArr || mswIntervals;
+  var slidesEls = wrap.querySelectorAll('.msw-slide');
+  var dotEls = wrap.querySelectorAll('.msw-dot');
+  var msCurrent = 0;
+  function showMsw(i){
+    if(i<0) i = slidesEls.length-1;
+    if(i>=slidesEls.length) i = 0;
+    slidesEls.forEach(function(el,idx){ el.style.display = idx===i ? 'block' : 'none'; });
+    dotEls.forEach(function(el,idx){ el.classList.toggle('active', idx===i); });
+    msCurrent = i;
+  }
+  wrap.querySelector('.msw-prev').addEventListener('click', function(){ showMsw(msCurrent-1); });
+  wrap.querySelector('.msw-next').addEventListener('click', function(){ showMsw(msCurrent+1); });
+  dotEls.forEach(function(el,idx){ el.addEventListener('click', function(){ showMsw(idx); }); });
+  var timer = setInterval(function(){ showMsw(msCurrent+1); }, 6500);
+  intervalsArr.push(timer);
+  var phoneEl = wrap.querySelector('.msw-phone');
+  phoneEl.addEventListener('mouseenter', function(){ clearInterval(timer); });
+  phoneEl.addEventListener('mouseleave', function(){
+    timer = setInterval(function(){ showMsw(msCurrent+1); }, 6500);
+    intervalsArr.push(timer);
+  });
+  return { showMsw: showMsw, getCurrent: function(){ return msCurrent; } };
+}
+function openMswModal(startAt){
+  var overlay = document.createElement('div');
+  overlay.className = 'msw-modal-overlay';
+  overlay.innerHTML = '<button type="button" class="msw-modal-close" aria-label="Fechar">✕</button>'+
+    '<div class="msw-modal-inner"><div class="msw-modal-group">'+buildMobileShowcaseInner()+'</div></div>';
+  document.body.appendChild(overlay);
+  var modalIntervals = [];
+  var api = wireMobileShowcaseCarousel(overlay, modalIntervals);
+  if(startAt) api.showMsw(startAt);
+  function computeScale(){
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var scale = Math.max(1, Math.min(2.3, (vw*0.82)/280, (vh*0.82)/565));
+    var group = overlay.querySelector('.msw-modal-group');
+    if(group) group.style.transform = 'scale('+scale+')';
+  }
+  computeScale();
+  window.addEventListener('resize', computeScale);
+  function close(){
+    modalIntervals.forEach(function(id){ clearInterval(id); });
+    window.removeEventListener('resize', computeScale);
+    document.removeEventListener('keydown', onKey);
+    overlay.remove();
+  }
+  function onKey(e){ if(e.key==='Escape') close(); }
+  document.addEventListener('keydown', onKey);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) close(); });
+  overlay.querySelector('.msw-modal-close').addEventListener('click', close);
+}
+function buildMobileSlide(s, onNext){
+  ensureMobileShowcaseStyles();
+  var wrap = document.createElement('div');
+  wrap.className = 'ctx-slide msw-widget';
+  wrap.style.cssText = '--msw-accent:'+ACCENT+';--msw-accent-light:'+shadeColor(ACCENT,45)+';--msw-accent-soft:'+tintColor(ACCENT,.88)+';--msw-accent-ink:'+shadeColor(ACCENT,-40)+';padding:36px 26px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;background:radial-gradient(circle at 12% 8%,'+tintColor(ACCENT,.75)+' 0%,transparent 50%),radial-gradient(circle at 92% 90%,'+tintColor(ACCENT,.82)+' 0%,transparent 50%),linear-gradient(160deg,'+tintColor(ACCENT,.93)+' 0%,#FBFAF7 60%);';
+  wrap.innerHTML =
+    ctxDecor(ACCENT)+
+    '<div style="position:relative;z-index:1;max-width:340px;width:100%;">'+
+    '<div class="slide-eyebrow" style="background:'+ACCENT+'18;color:'+shadeColor(ACCENT,-40)+';">📱 '+(s.mobileBadge||'Experiência do colaborador').replace(/</g,'&lt;')+'</div>'+
+    '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:23px;font-weight:700;line-height:1.24;color:#1B1B1F;margin:14px 0 10px;">'+(s.mobileHeadline||'').replace(/</g,'&lt;')+' <span style="color:'+ACCENT+';">'+(s.mobileHeadlineStrong||'').replace(/</g,'&lt;')+'</span></div>'+
+    '<div style="font-size:13.5px;color:#6B6B76;line-height:1.55;margin-bottom:22px;">'+(s.mobileSubline||'').replace(/</g,'&lt;')+'</div>'+
+    '<div class="msw-features-grid" style="display:grid;gap:9px;text-align:left;margin-bottom:8px;">'+
+    '<div style="background:#fff;border:1px solid #DEDCD4;padding:12px;border-radius:12px;font-size:11.5px;color:#475467;"><strong style="display:block;color:#1B1B1F;margin-bottom:3px;font-size:12px;">Comunicação</strong>Mural, notícias e grupos.</div>'+
+    '<div style="background:#fff;border:1px solid #DEDCD4;padding:12px;border-radius:12px;font-size:11.5px;color:#475467;"><strong style="display:block;color:#1B1B1F;margin-bottom:3px;font-size:12px;">RH</strong>Serviços e solicitações.</div>'+
+    '<div style="background:#fff;border:1px solid #DEDCD4;padding:12px;border-radius:12px;font-size:11.5px;color:#475467;"><strong style="display:block;color:#1B1B1F;margin-bottom:3px;font-size:12px;">Documentos</strong>Acesso rápido aos arquivos.</div>'+
+    '<div style="background:#fff;border:1px solid #DEDCD4;padding:12px;border-radius:12px;font-size:11.5px;color:#475467;"><strong style="display:block;color:#1B1B1F;margin-bottom:3px;font-size:12px;">Desenvolvimento</strong>Treinamentos e conteúdos.</div>'+
+    '</div>'+
+    '</div>'+
+    '<div style="position:relative;z-index:1;margin-top:22px;display:inline-block;">'+
+    '<button type="button" class="msw-expand-btn" title="Ver em tela cheia" aria-label="Expandir">⛶</button>'+
+    buildMobileShowcaseInner()+
+    '</div>'+
+    '<button id="mobNextBtn" class="slide-cta" style="position:relative;z-index:1;margin-top:24px;background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-30)+');color:#fff;border:none;border-radius:12px;padding:13px 26px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px -10px '+ACCENT+'99;">Continuar <span class="arrow">→</span></button>';
+  wrap.querySelector('.msw-expand-btn').addEventListener('click', function(){
+    var api = wrap.__mswApi;
+    openMswModal(api ? api.getCurrent() : 0);
+  });
+  wrap.__mswApi = wireMobileShowcaseCarousel(wrap);
+  wrap.querySelector('#mobNextBtn').addEventListener('click', onNext);
+  return wrap;
+}
+function buildContextSlide(s, onNext){
+  const wrap = document.createElement('div');
+  wrap.className = 'ctx-slide';
+  wrap.style.cssText = 'padding:44px 34px 40px;min-height:420px;display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 12% 10%,'+tintColor(ACCENT,.72)+' 0%,transparent 52%),radial-gradient(circle at 90% 88%,'+tintColor(ACCENT,.8)+' 0%,transparent 50%),linear-gradient(160deg,'+tintColor(ACCENT,.9)+' 0%,#FBFAF7 62%);';
+  wrap.innerHTML =
+    ctxDecor(ACCENT)+
+    '<div style="position:relative;z-index:1;display:flex;flex-direction:column;">'+
+    '<div class="slide-eyebrow" style="background:'+ACCENT+'18;color:'+shadeColor(ACCENT,-40)+';">👋 COMEÇANDO POR AQUI</div>'+
+    '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:23px;font-weight:700;line-height:1.32;color:#1B1B1F;margin-bottom:16px;">'+(applyTokens(s.ctxTitle||'')).replace(/</g,'&lt;')+'</div>'+
+    '<div style="font-size:14.5px;line-height:1.65;color:#5B5B66;margin-bottom:22px;">'+(applyTokens(s.ctxBody||'')).replace(/</g,'&lt;')+'</div>'+
+    '<div style="position:relative;background:'+ACCENT+'12;border-left:3px solid '+ACCENT+';border-radius:12px;padding:16px 18px 16px 20px;margin-bottom:28px;overflow:hidden;">'+
+      '<div class="quote-mark" style="color:'+ACCENT+';">"</div>'+
+      '<div style="position:relative;font-size:11px;font-weight:700;color:'+ACCENT+';letter-spacing:.04em;margin-bottom:6px;">💭 PRA REFLETIR</div>'+
+      '<div style="position:relative;font-size:15px;font-style:italic;color:#2A2A33;line-height:1.5;">'+(applyTokens(s.ctxQuestion||'')).replace(/</g,'&lt;')+'</div>'+
+    '</div>'+
+    '<button id="ctxNextBtn" class="slide-cta" style="align-self:flex-start;background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-30)+');color:#fff;border:none;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px -10px '+ACCENT+'99;">'+(s.ctxCta||'Continuar').replace(/s*→s*$/,'').replace(/</g,'&lt;')+' <span class="arrow">→</span></button>'+
+    '</div>';
+  wrap.querySelector('#ctxNextBtn').addEventListener('click', onNext);
+  return wrap;
+}
+
+function buildOpeningSlide(s, onNext){
+  const wrap = document.createElement('div');
+  wrap.className = 'open-slide';
+  wrap.style.cssText = 'padding:34px 30px 32px;min-height:420px;display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 88% 6%,'+tintColor(ACCENT,.75)+' 0%,transparent 50%),radial-gradient(circle at 6% 94%,'+tintColor(ACCENT,.82)+' 0%,transparent 52%),linear-gradient(160deg,'+tintColor(ACCENT,.92)+' 0%,#FBFAF7 60%);';
+  const cats = (s.openCategories || 'Comunidades, Comunicação, Reconhecimento, Engajamento, Desenvolvimento').split(',').map(function(c){return c.trim();}).filter(Boolean);
+  const catsHtml = cats.map(function(c){return '<span style="background:#fff;border:1px solid #EFEDE6;border-radius:999px;padding:5px 11px;font-size:11px;font-weight:600;color:#5B5B66;white-space:nowrap;">'+c.replace(/</g,'&lt;')+'</span>';}).join('');
+  // compatibilidade: demos antigas (sem openCards) viram 1 cartão a partir dos campos legados
+  const cards = (s.openCards && s.openCards.length) ? s.openCards : [{
+    type:'post', author:s.openAuthor||'Ana Paula', role:s.openAuthorRole||'', text:s.openPost||'',
+    tag:'CONQUISTA', tagKind:'good', reacts:'❤️ 👏', count:s.openLikes||0
+  }];
+  const cardsHtml = cards.map(function(c,i){ return openCardHTML(c,i,ACCENT); }).join('');
+  wrap.innerHTML =
+    '<div class="slide-eyebrow" style="background:'+ACCENT+'18;color:'+shadeColor(ACCENT,-40)+';align-self:flex-start;">🟢 É ASSIM QUE SUA EMPRESA APARECE NA HUMAND</div>'+
+    '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:22px;font-weight:700;line-height:1.3;color:#1B1B1F;margin:14px 0 8px;">'+(applyTokens(s.openHeadline||'')).replace(/</g,'&lt;')+'</div>'+
+    '<div style="font-size:13.5px;line-height:1.6;color:#5B5B66;margin-bottom:14px;">'+(applyTokens(s.openSubline||'')).replace(/</g,'&lt;')+'</div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">'+catsHtml+'</div>'+
+    '<div style="background:#fff;border:1px solid #EFEDE6;border-radius:16px;overflow:hidden;box-shadow:0 14px 30px -18px rgba(20,20,30,.28);">'+
+      '<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid #F1EFE9;">'+
+        '<div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-35)+');"></div>'+
+        '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;font-weight:700;color:#1B1B1F;">HUMAND</div>'+
+      '</div>'+
+      '<div style="padding:10px 16px 0;">'+
+        '<div style="background:#F6F5F1;border-radius:10px;padding:9px 12px;font-size:12.5px;color:#9C9BA3;">O que está acontecendo na sua empresa?</div>'+
+      '</div>'+
+      '<div class="open-thread">'+openThreadSVG(cards.length, ACCENT)+'</div>'+
+      '<div class="open-carousel-shell"><div class="open-carousel" id="openCarousel">'+cardsHtml+'</div></div>'+
+      '<div class="open-hint">arraste para o lado para ver mais →</div>'+
+    '</div>'+
+    '<button id="openNextBtn" class="slide-cta" style="align-self:flex-start;margin-top:22px;background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-30)+');color:#fff;border:none;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px -10px '+ACCENT+'99;">'+(s.openCta||'Continuar').replace(/s*→s*$/,'').replace(/</g,'&lt;')+' <span class="arrow">→</span></button>';
+  wrap.querySelector('#openNextBtn').addEventListener('click', onNext);
+  wireOpenCarousel(wrap.querySelector('#openCarousel'));
+  return wrap;
+}
+
+function buildCaseSlide(s){
+  const wrap = document.createElement('div');
+  wrap.className = 'case-slide';
+  wrap.style.cssText = 'padding:40px 32px 36px;min-height:420px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(160deg,'+tintColor(ACCENT,.9)+' 0%,#FFFFFF 55%);';
+  const statList = (s.caseStats||[]).filter(function(st){return st.value;});
+  const stats = statList.map(function(st,i){
+    return '<div class="stat-card" style="flex:1;text-align:center;padding:0 6px;'+(i<statList.length-1?'border-right:1px solid #EFEDE6;':'')+'animation-delay:'+(.08*i)+'s;">'+
+      '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:25px;font-weight:700;background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-35)+');-webkit-background-clip:text;background-clip:text;color:transparent;">'+st.value+'</div>'+
+      '<div style="font-size:10.5px;color:#8A8A93;margin-top:3px;line-height:1.3;">'+(st.label||'')+'</div></div>';
+  }).join('');
+  const initials = initialsOf(s.caseAuthor);
+  // Regra de ouro: dado comprovado -> mostra | dado ausente -> oculta o bloco inteiro
+  const industryBlock = s.caseIndustry ? '<div style="font-size:12px;color:#9C9BA3;margin-bottom:20px;">'+(s.caseIndustry||'').replace(/</g,'&lt;')+'</div>' : '';
+  const statsBlock = statList.length ? '<div style="display:flex;background:#fff;border-radius:16px;padding:20px 6px;box-shadow:0 12px 30px -14px rgba(20,20,30,.22);border:1px solid #F1EFE9;margin-bottom:20px;">'+stats+'</div>' : '';
+  const hasQuote = !!(s.caseQuote && s.caseQuote.trim());
+  const quoteBlock = hasQuote ?
+    '<div style="position:relative;background:#FAF9F6;border-radius:14px;padding:18px 20px 16px;margin-bottom:22px;overflow:hidden;">'+
+      '<div class="quote-mark" style="color:'+ACCENT+';">"</div>'+
+      '<div style="position:relative;font-size:14.5px;font-style:italic;color:#333;line-height:1.6;">'+(s.caseQuote||'').replace(/</g,'&lt;')+'</div>'+
+      '<div style="position:relative;display:flex;align-items:center;gap:10px;margin-top:14px;">'+
+        '<div class="case-avatar" style="background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-35)+');">'+initials+'</div>'+
+        '<div><div style="font-size:12.5px;font-weight:700;color:#1B1B1F;">'+(s.caseAuthor||'').replace(/</g,'&lt;')+'</div>'+
+        '<div style="font-size:11px;color:#9C9BA3;">'+(s.caseRole||'').replace(/</g,'&lt;')+'</div></div>'+
+      '</div>'+
+    '</div>' : '';
+  const hasCalendly = !!(s.caseCalendlyUrl && s.caseCalendlyUrl.trim());
+  const hasSummary = !!(s.caseSummary && s.caseSummary.trim());
+  const SUMMARY_CUT = 190;
+  const summaryEsc = hasSummary ? s.caseSummary.replace(/</g,'&lt;') : '';
+  const summaryLong = summaryEsc.length > SUMMARY_CUT;
+  function summaryParas(t){ return '<p style="margin:0 0 8px;">' + t.split(/\n\n+/).join('</p><p style="margin:0 0 8px;">') + '</p>'; }
+  const summaryBlock = hasSummary ?
+    '<div style="margin-bottom:20px;">'+
+      '<div id="caseSummaryShort" style="font-size:13px;line-height:1.6;color:#4A4A54;">'+(summaryLong ? summaryEsc.slice(0,SUMMARY_CUT).trim()+'…' : summaryEsc)+'</div>'+
+      '<div id="caseSummaryFull" style="display:none;font-size:13px;line-height:1.6;color:#4A4A54;">'+summaryParas(summaryEsc)+'</div>'+
+      (summaryLong ? '<button id="caseSummaryToggle" style="margin-top:6px;background:none;border:none;padding:0;color:'+ACCENT+';font-size:12px;font-weight:700;cursor:pointer;">Ler resumo completo ↓</button>' : '')+
+    '</div>' : '';
+  // A ideia é o lead ler o resumo aqui dentro em vez de sair pra outra aba — por isso o link
+  // pro material externo (quando existe) vira um link discreto no rodapé, não um botão grande.
+  const hasCta = !hasSummary && !!(s.caseVideoUrl || s.caseUrl);
+  const ctaBlock = hasCta ? '<button id="caseOpenBtn" class="slide-cta" style="align-self:flex-start;background:linear-gradient(135deg,'+ACCENT+','+shadeColor(ACCENT,-30)+');color:#fff;border:none;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px -10px '+ACCENT+'99;">'+(s.caseVideoUrl ? '▶ Assistir o case' : 'Ver case completo')+' <span class="arrow">→</span></button>' : '';
+  const smallExternalLinks = hasSummary ? [
+    s.caseVideoUrl ? '<a href="'+s.caseVideoUrl+'" target="_blank" rel="noopener" data-track="video" class="case-ext-link" style="display:block;margin-top:4px;font-size:11px;color:#9C9BA3;text-decoration:none;border-bottom:1px dotted #C8C6BC;width:fit-content;">🎥 Assistir vídeo (site da Humand, abre em nova aba)</a>' : '',
+    s.caseUrl ? '<a href="'+s.caseUrl+'" target="_blank" rel="noopener" data-track="page" class="case-ext-link" style="display:block;margin-top:4px;font-size:11px;color:#9C9BA3;text-decoration:none;border-bottom:1px dotted #C8C6BC;width:fit-content;">Ver página completa (site da Humand, abre em nova aba)</a>' : ''
+  ].join('') : '';
+  const calendlyBlock = hasCalendly ? '<button id="caseCalendlyBtn" class="slide-cta" style="align-self:flex-start;background:#fff;color:'+shadeColor(ACCENT,-40)+';border:2px solid '+ACCENT+';border-radius:12px;padding:11px 20px;font-size:13.5px;font-weight:700;cursor:pointer;">📅 Agendar uma conversa <span class="arrow">→</span></button>' : '';
+  wrap.innerHTML =
+    '<span class="slide-confetti" style="width:10px;height:10px;top:14px;right:36px;background:#FF6A39;opacity:.5;animation-delay:.1s;"></span>'+
+    '<span class="slide-confetti" style="width:6px;height:6px;top:64px;right:78px;background:#25D366;opacity:.6;animation-delay:.7s;"></span>'+
+    '<span class="slide-confetti" style="width:8px;height:8px;top:38px;right:14px;background:#E8368F;opacity:.4;animation-delay:1.2s;"></span>'+
+    '<span class="slide-confetti" style="width:5px;height:5px;top:96px;right:46px;background:'+ACCENT+';opacity:.55;animation-delay:.4s;"></span>'+
+    '<div class="slide-eyebrow" style="background:#FFF1E8;color:#B24A1E;">🏆 CASE REAL</div>'+
+    '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:21px;font-weight:700;color:#1B1B1F;margin-bottom:'+(s.caseIndustry?'3px':'18px')+';">'+(s.caseCompany||'').replace(/</g,'&lt;')+'</div>'+
+    industryBlock + statsBlock + quoteBlock + summaryBlock +
+    '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;">'+ctaBlock+calendlyBlock+'</div>' +
+    smallExternalLinks;
+  const openBtn = wrap.querySelector('#caseOpenBtn');
+  if(openBtn) openBtn.addEventListener('click', function(){
+    const url = s.caseVideoUrl || s.caseUrl;
+    if(url){ track('case_click'); window.open(url, '_blank'); }
+  });
+  wrap.querySelectorAll('.case-ext-link').forEach(function(a){
+    a.addEventListener('click', function(){ track('case_external_click', {kind:a.dataset.track}); });
+  });
+  const calendlyBtn = wrap.querySelector('#caseCalendlyBtn');
+  if(calendlyBtn) calendlyBtn.addEventListener('click', function(){
+    track('calendly_click');
+    window.open(s.caseCalendlyUrl, '_blank');
+  });
+  const summaryToggle = wrap.querySelector('#caseSummaryToggle');
+  if(summaryToggle) summaryToggle.addEventListener('click', function(){
+    const short = wrap.querySelector('#caseSummaryShort');
+    const full = wrap.querySelector('#caseSummaryFull');
+    const expanded = full.style.display !== 'none';
+    full.style.display = expanded ? 'none' : 'block';
+    short.style.display = expanded ? 'block' : 'none';
+    summaryToggle.textContent = expanded ? 'Ler resumo completo ↓' : 'Ver menos ↑';
+    if(!expanded) track('case_summary_expand');
+  });
+  return wrap;
+}
+
+function render(){
+  clearMswIntervals();
+  stage.innerHTML = '';
+  if(showingHub){
+    renderHub();
+    return;
+  }
+  stage.classList.remove('stage-hub');
+  if(!screens.length){
+    stage.innerHTML = '<div style="padding:60px 30px;text-align:center;color:#8A8A93;font-size:13px;">Esta demo ainda não tem nenhuma tela adicionada.</div>';
+    return;
+  }
+  const s = screens[idx];
+  if(s.type==='opening'){
+    stage.appendChild(buildOpeningSlide(s, ()=>{
+      if(HUB_ENABLED && SECOES.length && idx===0){
+        showingHub = true; track('open_next'); render(); return;
+      }
+      idx=(idx+1)%screens.length; track('open_next'); render();
+    }));
+    renderDots();
+    return;
+  }
+  if(s.type==='context'){
+    stage.appendChild(buildContextSlide(s, ()=>{
+      if(HUB_ENABLED && SECOES.length && idx===0){
+        showingHub = true; track('ctx_next'); render(); return;
+      }
+      idx=(idx+1)%screens.length; track('ctx_next'); render();
+    }));
+    renderDots();
+    return;
+  }
+  if(s.type==='divider'){
+    stage.appendChild(buildDividerSlide(s, ()=>{
+      if(HUB_ENABLED && SECOES.length && idx===0){
+        showingHub = true; track('divider_next'); render(); return;
+      }
+      idx=(idx+1)%screens.length; track('divider_next'); render();
+    }));
+    track('divider_view');
+    renderDots();
+    return;
+  }
+  if(s.type==='mobile'){
+    stage.appendChild(buildMobileSlide(s, ()=>{
+      if(HUB_ENABLED && SECOES.length && idx===0){
+        showingHub = true; track('mobile_next'); render(); return;
+      }
+      idx=(idx+1)%screens.length; track('mobile_next'); render();
+    }));
+    track('mobile_view');
+    renderDots();
+    return;
+  }
+  if(s.type==='case'){
+    stage.appendChild(buildCaseSlide(s));
+    track('case_view');
+    renderDots();
+    return;
+  }
+  const holder = document.createElement('div');
+  holder.style.position='relative'; holder.style.width='100%';
+  let img;
+  if(s.captureHtml){
+    img = document.createElement('div');
+    img.style.cssText = 'position:relative;width:100%;overflow:hidden;pointer-events:auto;';
+    const inner = document.createElement('div');
+    inner.style.cssText = 'width:'+CAPTURE_W+'px;height:'+CAPTURE_H+'px;transform-origin:top left;pointer-events:none;';
+    const ifr = document.createElement('iframe');
+    ifr.srcdoc = s.captureHtml;
+    ifr.style.cssText = 'width:'+CAPTURE_W+'px;height:'+CAPTURE_H+'px;border:0;display:block;background:#fff;pointer-events:none;';
+    ifr.setAttribute('sandbox','allow-same-origin');
+    // 'no' em vez de 'auto': sem scroll próprio dentro do iframe — os pontos/destaques são
+    // posicionados em % assumindo a captura inteira visível de uma vez, como uma foto. Se o
+    // iframe pudesse rolar por conta própria, o conteúdo se moveria sem os pontos acompanharem.
+    ifr.setAttribute('scrolling','no');
+    inner.appendChild(ifr);
+    img.appendChild(inner);
+    let captureH = CAPTURE_H;
+    const fit = ()=>{
+      const w = img.clientWidth;
+      if(!w) return;
+      const scale = w / CAPTURE_W;
+      inner.style.transform = 'scale('+scale+')';
+      img.style.height = (captureH*scale) + 'px';
+    };
+    ifr.addEventListener('load', ()=>{
+      try{
+        const doc = ifr.contentDocument;
+        const realH = Math.max(
+          doc.documentElement ? doc.documentElement.scrollHeight : 0,
+          doc.body ? doc.body.scrollHeight : 0,
+          CAPTURE_H
+        );
+        if(realH && realH !== captureH){
+          captureH = realH;
+          inner.style.height = captureH+'px';
+          ifr.style.height = captureH+'px';
+        }
+      }catch(e){ /* se não der pra medir, mantém CAPTURE_H */ }
+      fit();
+    });
+    requestAnimationFrame(fit);
+    if(window.ResizeObserver) new ResizeObserver(fit).observe(img);
+    else window.addEventListener('resize', fit);
+  } else {
+    img = document.createElement('img'); img.src = s.src;
+  }
+  holder.appendChild(img);
+  stage.appendChild(holder);
+  s.points.forEach(p=>{
+    if(p.kind==='field'){
+      holder.appendChild(buildFieldElement(p, demoState, null));
+      return;
+    }
+    if(p.kind==='output'){
+      holder.appendChild(buildOutputElement(p, demoState));
+      return;
+    }
+    if(p.kind==='arrow'){
+      holder.appendChild(buildArrowElement(p));
+      return;
+    }
+    const isCta = p.target === 'contact';
+    if(p.kind==='highlight'){
+      const box = document.createElement('div');
+      box.className='highlight-box' + (isCta ? ' h-cta' : '') + (p.target ? '' : ' h-static');
+      box.style.left=p.x+'%'; box.style.top=p.y+'%'; box.style.width=p.w+'%'; box.style.height=p.h+'%';
+      if(p.text || isCta){
+        const tag = document.createElement('span');
+        tag.className='h-tag'; tag.textContent = applyTokens(p.text) || (isCta ? 'Fale comigo →' : '');
+        box.appendChild(tag);
+      }
+      if(p.target){
+        box.tabIndex=0; box.setAttribute('role','button');
+        box.addEventListener('click', ()=>handleClick(holder,p));
+        box.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();handleClick(holder,p);} });
+      }
+      holder.appendChild(box);
+      return;
+    }
+    const dot = document.createElement('div');
+    dot.className='point' + (isCta ? ' point-cta' : '');
+    dot.style.left=p.x+'%'; dot.style.top=p.y+'%';
+    dot.tabIndex=0; dot.setAttribute('role','button');
+    dot.addEventListener('click', ()=>handleClick(holder,p));
+    dot.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();handleClick(holder,p);} });
+    holder.appendChild(dot);
+  });
+  renderDots();
+  track('screen_view');
+}
+
+function openImageLightbox(src){
+  const ov = document.createElement('div');
+  ov.className = 'img-lightbox';
+  ov.innerHTML = '<button type="button" class="lb-close" aria-label="Fechar">✕</button><img src="'+src+'">';
+  const close = ()=>{ ov.remove(); document.removeEventListener('keydown', onEsc); };
+  const onEsc = (e)=>{ if(e.key==='Escape') close(); };
+  ov.addEventListener('click', (e)=>{ if(e.target===ov || e.target.classList.contains('lb-close')) close(); });
+  document.addEventListener('keydown', onEsc);
+  document.body.appendChild(ov);
+}
+function handleClick(holder, p){
+  holder.querySelectorAll('.tooltip-bubble').forEach(b=>b.remove());
+  const isCta = p.target === 'contact';
+  if(p.text || p.image){
+    const b = document.createElement('div');
+    b.className='tooltip-bubble';
+    b.style.left = Math.min(p.x,65)+'%'; b.style.top = Math.max(p.y-16,4)+'%';
+    const hasTarget = isCta || !!p.target;
+    b.innerHTML = '<button type="button" class="tb-close" aria-label="Fechar">✕</button>' + (p.image?'<img src="'+p.image+'">':'') + applyTokens(p.text||'').replace(/</g,'&lt;') + (hasTarget?'<div><button class="'+(isCta?'cta':'')+'">'+(isCta?'Falar agora →':'Avançar')+'</button></div>':'');
+    b.querySelector('.tb-close').addEventListener('click', (e)=>{ e.stopPropagation(); b.remove(); });
+    const bImg = b.querySelector('img');
+    if(bImg) bImg.addEventListener('click', (e)=>{ e.stopPropagation(); openImageLightbox(p.image); });
+    if(hasTarget) b.querySelector('div button').addEventListener('click', ()=> isCta ? goToContact() : goTo(p.target));
+    holder.appendChild(b);
+  } else if(isCta){
+    goToContact();
+  } else {
+    goTo(p.target);
+  }
+}
+function goToContact(){
+  track('cta_click');
+  if(CONTACT_HREF) window.open(CONTACT_HREF, '_blank');
+}
+function goTo(targetId){
+  const i = screens.findIndex(s=>s.id==targetId);
+  idx = i>=0 ? i : (idx+1)%screens.length;
+  render();
+}
+document.getElementById('restart').addEventListener('click', ()=>{
+  idx = openingIdx>=0 ? openingIdx : 0;
+  demoState={};
+  if(HUB_ENABLED && SECOES.length) showingHub = !hasIntroContext;
+  track('restart');
+  render();
+});
+const menuBtn = document.getElementById('menuBtn');
+if(HUB_ENABLED && SECOES.length){
+  menuBtn.style.display = 'inline-block';
+  menuBtn.addEventListener('click', ()=>{ showingHub = true; render(); });
+}
+const fixedContactBtn = document.getElementById('contactBtn');
+if(fixedContactBtn) fixedContactBtn.addEventListener('click', ()=> track('cta_click'));
+track('demo_open');
+render();
+</script>
+</body></html>
